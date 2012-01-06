@@ -1,0 +1,23 @@
+= Head Counter =
+
+The aim of this software is to be able to count the number of people present in a crowd, especially in protests, and provide an estimate as accurate as possible. This software is currently at a very early stage.
+
+This project used to be on bitbucket when I was using mainly mercurial, before discovering git. I imported it without the history. As I was the sole contributor to this project, this is not a huge loss. I put it here in the hope I will be able to improve it a bit. I have not used it for 2 years and apaprently it doesn't work anymore with the most recent versions of openCV.
+
+Be warned that it probably does not work out of the box right now.
+
+= Compilation = 
+
+You need OpenCV to compile this software (that means the packages libcv-dev and libhighgui-dev). I am trying to keep it in sync with the latest ubuntu stable distribution. It should work well with debian as well. It supposes the include files are in /usr/include/opencv and the libs in /usr/lib. The Makefile is very straightforward to change. Once done, simply typing :
+
+make
+
+should compile both cvplayer and headcounter.
+
+cvplayer is a simple test utility to check that your opencv configuration manage to read a specific file
+
+headcounter is the main program. headcounter -h gives you instruction on how to use it.
+
+= Support =
+
+You can contact me at quemener dot yves at free dot fr. 

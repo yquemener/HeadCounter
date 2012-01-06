@@ -1,0 +1,26 @@
+
+<article>
+<date>2010-07-01</date>
+<title>Introduction</title>
+<para>
+The goal of HeadCounts is to create a software that is able to count the number of people appearing in a video movie. The main intended use is the counting of persons in a protest.
+</para></article>
+
+
+<article>
+<date>2010-07-03</date>
+<title>Gathered movies</title>
+<para>
+Finding long, high quality, fixed point of view, movies of protests is difficult. For the time being, I use videos gathered on youtube showing different kinds of crowds : marathon starts, rush hours and Shibuya crossing movies (that many people have been filming on HD) 
+[? LIST videos with links here]
+</para></article>
+
+<article>
+<date>2010-07-04</date>
+<title>OpenCV Haar object detector and the marathon run</title>
+<para>
+My first idea was to count people was to count faces appearing in the image thanks to OpenCV. Thinking a bit more about it and discussing with some people made me reconsider but putting together a simple demo of the face detector of OpenCV is quick to do and -who knows- might even be interesting. It works a bit better than I expected but is still not good
+enough for the intended use.
+[? include result images here]
+I estimate a 70% success rate. Fake positives are rare but fake negatives are high. This made me think about providing two versions (or two set of parameters) for the software : one with the lowest fake positives rates achievable and one with the lowest fake negative rate possible. 
+</para></article>
