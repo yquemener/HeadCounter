@@ -8,11 +8,15 @@ Be warned that it probably does not work out of the box right now.
 
 = Compilation = 
 
-You need OpenCV to compile this software (that means the packages libcv-dev and libhighgui-dev). I am trying to keep it in sync with the latest ubuntu stable distribution. It should work well with debian as well. It supposes the include files are in /usr/include/opencv and the libs in /usr/lib. The Makefile is very straightforward to change. Once done, simply typing :
+You need OpenCV to compile this software. It should work well with the latest opencv from debian and ubuntu as well. It uses CMake to build. The process is as follow :
 
+cd HeadCounter
+mkdir build
+cd build
+cmake ..
 make
 
-should compile both cvplayer and headcounter.
+this should compile both cvplayer and headcounter.
 
 cvplayer is a simple test utility to check that your opencv configuration manage to read a specific file
 
