@@ -17,15 +17,16 @@
  * This is the main file of the headcounter
  */
 
-#include "cv.h"
-#include "highgui.h"
+#include "opencv2/video/tracking.hpp"
+#include "opencv2/highgui/highgui.hpp"
+#include "opencv2/imgproc/imgproc.hpp"
+#include "opencv2/objdetect/objdetect.hpp"
 #include "stdio.h"
 #include <vector>
 #include <map>
 #include <iostream>
 #include <fstream>
 
-#include "haar_modified.h"
 
 /*CV_IMPL CvSeq*
 cvHaarDetectObjects2( const CvArr* _img,
@@ -35,7 +36,7 @@ cvHaarDetectObjects2( const CvArr* _img,
 
 
 using namespace std;
-
+using namespace cv;
 
 int inline sqr(int x) { return x*x; }
 
@@ -255,9 +256,12 @@ int main(int argc, char *argv[])
 	// Current frame number
 	int numImg=0;
 
-	CvHaarClassifierCascade*  cascade;
+  //CvHaarClassifierCascade*  cascade;
+  CascadeClassifier cascade;
+
 	CvMemStorage* storage = cvCreateMemStorage(0);
-	cascade = (CvHaarClassifierCascade*)cvLoad( param_cascade_filename, 0,0,0 );
+  //cascade = (CvHaarClassifierCascade*)cvLoad( param_cascade_filename, 0,0,0 );
+  cascade.load(param_cascade_filename);
 
 	CvFont font;
 	cvInitFont(&font, CV_FONT_HERSHEY_SIMPLEX, 0.8, 0.8, 0, 2, CV_AA);
@@ -337,24 +341,31 @@ int main(int argc, char *argv[])
 		//cvSetImageROI(gray, ROI);
 		
 		// rectangles found or replayes for the current frame
-		vector<CvRect *>	current_faces;
+    vector<Rect>	current_faces;
 
 		if(param_replayfile_name==0)
 		{
 		
-			CvSeq* faces = changed_cvHaarDetectObjects( gray, cascade, storage,
+      /*CvSeq* faces = cvHaarDetectObjects( gray, cascade, storage,
 												1.1, param_neighbors, 0
 												,cvSize(param_min_face_size, param_min_face_size)
-												,cvSize(param_max_face_size, param_max_face_size));
+                        ,cvSize(param_max_face_size, param_max_face_size));*/
+
+
+      Mat _gray(gray);
+      cascade.detectMultiScale(_gray, current_faces, 1.1, 3, 0,
+                                    Size(100,100));
+
+
 			/*CvSeq* faces = cvHaarDetectObjects( gray, cascade, storage,
 														1.1, 2, 0
 														,cvSize(200, 200));*/
 
-			for( int i = 0; i < (faces ? faces->total : 0); i++ )
+      /*for( int i = 0; i < (faces ? faces->total : 0); i++ )
 			{
 				CvRect* r = (CvRect*)cvGetSeqElem( faces, i );
 				current_faces.push_back(r);
-			}
+      }*/
 		}
 		else
 		{
@@ -366,11 +377,11 @@ int main(int argc, char *argv[])
 			}
 			while(replayContent[current_index_in_replay]==numImg)
 			{
-				CvRect* r = new CvRect();
-				r->x=replayContent[current_index_in_replay+1];
-				r->y=replayContent[current_index_in_replay+2];
-				r->width=replayContent[current_index_in_replay+3];
-				r->height=replayContent[current_index_in_replay+4];												
+        CvRect r;
+        r.x=replayContent[current_index_in_replay+1];
+        r.y=replayContent[current_index_in_replay+2];
+        r.width=replayContent[current_index_in_replay+3];
+        r.height=replayContent[current_index_in_replay+4];
 				current_faces.push_back(r);
 				if(current_index_in_replay<replayContent.size()-5)
 				{
@@ -399,20 +410,20 @@ int main(int argc, char *argv[])
 		}
 		for( unsigned int i = 0; i < current_faces.size(); i++ )
 		{
-			CvRect* r = current_faces[i];
+      CvRect r = current_faces[i];
 			CvPoint center;
 
-			center.x = cvRound((ROI.x + r->x + r->width*0.5));
-			center.y = cvRound((ROI.y + r->y + r->height*0.5));
+      center.x = cvRound((ROI.x + r.x + r.width*0.5));
+      center.y = cvRound((ROI.y + r.y + r.height*0.5));
 
-			pastFaces.push_back(cvRound((ROI.x + r->x + r->width*0.5)));
-			pastFaces.push_back(cvRound((ROI.y + r->y + r->height*0.5)));
+      pastFaces.push_back(cvRound((ROI.x + r.x + r.width*0.5)));
+      pastFaces.push_back(cvRound((ROI.y + r.y + r.height*0.5)));
 			pastFaces.push_back(numImg);
 
 
 			if(param_outfile_name!=0)
 			{
-				out_text_file << numImg << " " << r->x << " " << r->y << " " << r->width << " " << r->height << std::endl;
+        out_text_file << numImg << " " << r.x << " " << r.y << " " << r.width << " " << r.height << std::endl;
 			}
 
 			// Find the closest face on the last frames and link them
@@ -510,10 +521,10 @@ int main(int argc, char *argv[])
 							color = cvScalar(0,255,0);
 					}
 				}
-				CvPoint p1 = cvPoint(ROI.x + r->x,
-									 ROI.y + r->y);
-				CvPoint p2 = cvPoint(ROI.x + r->x + r->width,
-									 ROI.y + r->y + r->height);
+        CvPoint p1 = cvPoint(ROI.x + r.x,
+                   ROI.y + r.y);
+        CvPoint p2 = cvPoint(ROI.x + r.x + r.width,
+                   ROI.y + r.y + r.height);
 
 				cvRectangle(testImg,p1,p2, color, 2);
 			}

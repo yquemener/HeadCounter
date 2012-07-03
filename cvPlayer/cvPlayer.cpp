@@ -23,19 +23,19 @@
  */
 
 
-#include "cv.h"
-#include "highgui.h"
+#include "opencv2/highgui/highgui.hpp"
 #include <vector>
 #include <map>
 #include <iostream>
 #include <string>
 
 
-
+using namespace std;
+using namespace cv;
 
 int main(int argc, char *argv[])
 {
-	CvCapture * capture;
+  VideoCapture capture;
 
 	int argi=1;
 	bool	param_open_cam		 = false;
@@ -59,29 +59,31 @@ int main(int argc, char *argv[])
 
 	if(param_open_cam)
 	{
-		capture = cvCaptureFromCAM( atoi(param_input) );
+    capture.open(atoi(param_input));
+    capture.set(CV_CAP_PROP_FRAME_WIDTH, 640);
+    capture.set(CV_CAP_PROP_FRAME_HEIGHT, 480);
 	}
-	else
+  else
 	{
-		capture = cvCreateFileCapture( param_input );
-	}
+    capture.open( param_input );
+  }
 
-	if(!capture)
+  if(!capture.isOpened())
 	{
 		std::cerr << "Could not open video file: "<< param_input << std::endl;
 		return 1;
 	}
-	IplImage* testImg;
+  Mat testImg;
 	cvNamedWindow( "result", 1 );
 
 
-	while(cvGrabFrame(capture))
+  while(true)
 	{
-		testImg = cvRetrieveFrame(capture);
+    capture >> testImg;
 
 		if(cvWaitKey(5) >= 10)
 			return 0;
 
-		cvShowImage("result", testImg);
+    imshow("result", testImg);
 	}
 }
