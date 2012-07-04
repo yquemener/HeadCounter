@@ -201,7 +201,7 @@ int main(int argc, char *argv[])
 	if(param_cascade_filename==0)
 	{
 		param_cascade_filename = new char[1024];
-		sprintf(param_cascade_filename,"data/haarcascade_frontalface_alt.xml");
+    sprintf(param_cascade_filename,"data/haarcascade_frontalface_default.xml");
 	}
 
 	if(!param_show_video)
@@ -277,6 +277,12 @@ int main(int argc, char *argv[])
 	}
   Mat testImg;
   Mat gray;
+  Rect ROI;
+
+  ROI.width = -1;
+  ROI.height = 720;
+  ROI.x=0;
+  ROI.y=00;
 
 	if(param_show_video)
 	{
@@ -319,16 +325,13 @@ int main(int argc, char *argv[])
 			{
 				return 0;
 			}
-
+      if(ROI.width>0) testImg = testImg(ROI);
       cvtColor(testImg, gray, CV_BGR2GRAY);
 		}
-    Rect ROI;
-		ROI.width = 1920;
-		ROI.height = 1080;
-		ROI.x=0;
-		ROI.y=0;
 
-		//cvSetImageROI(gray, ROI);
+
+    //cvSetImageROI(gray, ROI);
+
 		
 		// rectangles found or replayes for the current frame
     vector<Rect>	current_faces;
@@ -336,32 +339,12 @@ int main(int argc, char *argv[])
 		if(param_replayfile_name==0)
 		{
       vector<Rect> tmp;
-      /*CvSeq* faces = cvHaarDetectObjects( gray, cascade, storage,
-												1.1, param_neighbors, 0
-												,cvSize(param_min_face_size, param_min_face_size)
-                        ,cvSize(param_max_face_size, param_max_face_size));*/
 
-
-
-
-
-      cascade.detectMultiScale(gray, current_faces, 1.1, 3, 0
-                               //|CV_HAAR_FIND_BIGGEST_OBJECT
-                               //|CV_HAAR_DO_ROUGH_SEARCH
-                               |CV_HAAR_SCALE_IMAGE,
-                               cvSize(20,20),
-                               cvSize(40,40));
-      //current_faces.insert(current_faces.begin(), tmp.begin(), tmp.end());
-
-			/*CvSeq* faces = cvHaarDetectObjects( gray, cascade, storage,
-														1.1, 2, 0
-														,cvSize(200, 200));*/
-
-      /*for( int i = 0; i < (faces ? faces->total : 0); i++ )
-			{
-				CvRect* r = (CvRect*)cvGetSeqElem( faces, i );
-				current_faces.push_back(r);
-      }*/
+      cascade.detectMultiScale(gray, current_faces, 1.2
+                               ,param_neighbors
+                               ,CV_HAAR_SCALE_IMAGE
+                               ,Size(param_min_face_size, param_min_face_size)
+                               ,Size(param_max_face_size, param_max_face_size));
 		}
 		else
 		{
