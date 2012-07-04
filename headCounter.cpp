@@ -342,20 +342,27 @@ int main(int argc, char *argv[])
 		
 		// rectangles found or replayes for the current frame
     vector<Rect>	current_faces;
+    Mat _gray(gray);
 
 		if(param_replayfile_name==0)
 		{
-		
+      vector<Rect> tmp;
       /*CvSeq* faces = cvHaarDetectObjects( gray, cascade, storage,
 												1.1, param_neighbors, 0
 												,cvSize(param_min_face_size, param_min_face_size)
                         ,cvSize(param_max_face_size, param_max_face_size));*/
 
 
-      Mat _gray(gray);
-      cascade.detectMultiScale(_gray, current_faces, 1.1, 3, 0,
-                                    Size(100,100));
 
+
+
+      cascade.detectMultiScale(_gray, current_faces, 1.1, 3, 0
+                               //|CV_HAAR_FIND_BIGGEST_OBJECT
+                               //|CV_HAAR_DO_ROUGH_SEARCH
+                               |CV_HAAR_SCALE_IMAGE,
+                               cvSize(20,20),
+                               cvSize(40,40));
+      //current_faces.insert(current_faces.begin(), tmp.begin(), tmp.end());
 
 			/*CvSeq* faces = cvHaarDetectObjects( gray, cascade, storage,
 														1.1, 2, 0
@@ -398,7 +405,7 @@ int main(int argc, char *argv[])
 		static int farthest_past_value=0;
 		static int farthest_past_index=0;
 
-		if(numImg%100==0)
+    if(numImg%10==0)
 		{
 			printf("Frame#%d(%.1f sec): doing %d computations (%d * %d). Cross count so far : %d\n",
 			   numImg,
@@ -408,11 +415,15 @@ int main(int argc, char *argv[])
 			   (pastFaces.size() - farthest_past_index),
 			   crosscount);
 		}
+
 		for( unsigned int i = 0; i < current_faces.size(); i++ )
 		{
+      rectangle(_gray, Rect(10,10,100,100), Scalar(0,0,0));
       CvRect r = current_faces[i];
 			CvPoint center;
+			printf("%d\n", r.width);
 
+      rectangle(_gray, r, Scalar(0,0,255), 2,0,0);
       center.x = cvRound((ROI.x + r.x + r.width*0.5));
       center.y = cvRound((ROI.y + r.y + r.height*0.5));
 
@@ -568,7 +579,8 @@ int main(int argc, char *argv[])
 
 		if(param_show_video)
 		{
-			cvShowImage("result", testImg);
+      imshow("result", _gray);
+      //cvShowImage("result", testImg);
 		}
 
 		if(param_dump)
