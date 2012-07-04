@@ -263,24 +263,20 @@ int main(int argc, char *argv[])
   //cascade = (CvHaarClassifierCascade*)cvLoad( param_cascade_filename, 0,0,0 );
   cascade.load(param_cascade_filename);
 
-	CvFont font;
-	cvInitFont(&font, CV_FONT_HERSHEY_SIMPLEX, 0.8, 0.8, 0, 2, CV_AA);
-
-
-	CvCapture * capture=0;
+  VideoCapture capture;
 
 	if(param_grab_video)
 	{
-		capture = cvCreateFileCapture( param_infile_name );
+    capture.open( param_infile_name );
 
-		if(!capture)
+    if(!capture.isOpened())
 		{
 			std::cerr << "Could not open video device :" << param_infile_name << std::endl;
 			return 1;
 		}
 	}
-	IplImage* testImg=0;
-	IplImage *gray=0;
+  Mat testImg;
+  Mat gray;
 
 	if(param_show_video)
 	{
@@ -316,10 +312,7 @@ int main(int argc, char *argv[])
 	{
 		if(param_grab_video)
 		{
-			if(!cvGrabFrame(capture))
-				return 0;
-
-			testImg = cvRetrieveFrame(capture);
+      capture >> testImg;
 
 			char key = cvWaitKey(10);
 			if( key == 27)
@@ -327,12 +320,9 @@ int main(int argc, char *argv[])
 				return 0;
 			}
 
-			if(gray==0)
-				gray = cvCreateImage(cvSize(testImg->width, testImg->height), 8, 1);
-
-			cvCvtColor(testImg, gray, CV_BGR2GRAY);
+      cvtColor(testImg, gray, CV_BGR2GRAY);
 		}
-		CvRect ROI;
+    Rect ROI;
 		ROI.width = 1920;
 		ROI.height = 1080;
 		ROI.x=0;
@@ -342,7 +332,6 @@ int main(int argc, char *argv[])
 		
 		// rectangles found or replayes for the current frame
     vector<Rect>	current_faces;
-    Mat _gray(gray);
 
 		if(param_replayfile_name==0)
 		{
@@ -356,7 +345,7 @@ int main(int argc, char *argv[])
 
 
 
-      cascade.detectMultiScale(_gray, current_faces, 1.1, 3, 0
+      cascade.detectMultiScale(gray, current_faces, 1.1, 3, 0
                                //|CV_HAAR_FIND_BIGGEST_OBJECT
                                //|CV_HAAR_DO_ROUGH_SEARCH
                                |CV_HAAR_SCALE_IMAGE,
@@ -384,7 +373,7 @@ int main(int argc, char *argv[])
 			}
 			while(replayContent[current_index_in_replay]==numImg)
 			{
-        CvRect r;
+        Rect r;
         r.x=replayContent[current_index_in_replay+1];
         r.y=replayContent[current_index_in_replay+2];
         r.width=replayContent[current_index_in_replay+3];
@@ -418,12 +407,10 @@ int main(int argc, char *argv[])
 
 		for( unsigned int i = 0; i < current_faces.size(); i++ )
 		{
-      rectangle(_gray, Rect(10,10,100,100), Scalar(0,0,0));
-      CvRect r = current_faces[i];
-			CvPoint center;
-			printf("%d\n", r.width);
+      Rect r = current_faces[i];
+      Point center;
 
-      rectangle(_gray, r, Scalar(0,0,255), 2,0,0);
+      rectangle(testImg, r, Scalar(0,0,255), 2,0,0);
       center.x = cvRound((ROI.x + r.x + r.width*0.5));
       center.y = cvRound((ROI.y + r.y + r.height*0.5));
 
@@ -519,7 +506,7 @@ int main(int argc, char *argv[])
 			}
 			if(param_show_faces)
 			{
-				CvScalar color;
+        Scalar color;
 				if(faceIndices.find((pastFaces.size()-1)/3)!=faceIndices.end())
 				{
 					if(trailLength[faceIndices[(pastFaces.size()-1)/3]]<5)
@@ -527,67 +514,67 @@ int main(int argc, char *argv[])
 					else
 					{
 						if(faceCounted[faceIndices[(pastFaces.size()-1)/3]])
-							color = cvScalar(0,0,255);
+              color = Scalar(0,0,255);
 						else
-							color = cvScalar(0,255,0);
+              color = Scalar(0,255,0);
 					}
 				}
-        CvPoint p1 = cvPoint(ROI.x + r.x,
+        Point p1 = cvPoint(ROI.x + r.x,
                    ROI.y + r.y);
-        CvPoint p2 = cvPoint(ROI.x + r.x + r.width,
+        Point p2 = cvPoint(ROI.x + r.x + r.width,
                    ROI.y + r.y + r.height);
 
-				cvRectangle(testImg,p1,p2, color, 2);
+        rectangle(testImg,p1,p2, color, 2);
 			}
 		}
 
 		//cvRectangleR(testImg, ROI, cvScalar(255,0,0),5);
 		if(param_show_trails)
 		{
-			CvScalar color;
+      Scalar color;
 			for(unsigned int i=0;i<lines.size();i+=5)
 			{
 				if(faceCounted[lines[i+4]])
-					color = cvScalar(0,0,255);
+          color = Scalar(0,0,255);
 				else
-					color = cvScalar(0,255,0);
+          color = Scalar(0,255,0);
 
-				cvLine(testImg, cvPoint(lines[i],lines[i+1]),
-							cvPoint(lines[i+2],lines[i+3]),
+        line(testImg, Point(lines[i],lines[i+1]),
+              Point(lines[i+2],lines[i+3]),
 							color, 1);
 			}
 		}
 
 		if(param_show_lines)
 		{
-			cvLine(testImg, cvPoint(0,param_y_line),
-							cvPoint(testImg->width,param_y_line),
-							cvScalar(255,255,255), 1);
+      line(testImg, Point(0,param_y_line),
+              Point(testImg.cols,param_y_line),
+              Scalar(255,255,255), 1);
 
-			cvLine(testImg, cvPoint(param_x_line,0),
-							cvPoint(param_x_line, testImg->height),
-							cvScalar(255,255,255), 1);
+      line(testImg, Point(param_x_line,0),
+              Point(param_x_line, testImg.rows),
+              Scalar(255,255,255), 1);
 		}
 
 		if (param_show_count)
 		{
 			char bufcount[1000];
 			sprintf(bufcount, "People found : %d", crosscount);
-			cvPutText(testImg, bufcount, cvPoint(20, 20),  &font, cvScalar(0,  255, 0, 0));
+      putText(testImg, bufcount, Point(20,20),
+              FONT_HERSHEY_SIMPLEX, 0.8, Scalar(0,255,0), 2.0 );
 		}
 
 
 		if(param_show_video)
 		{
-      imshow("result", _gray);
-      //cvShowImage("result", testImg);
+      imshow("result", testImg);
 		}
 
 		if(param_dump)
 		{
 			char buf[256];
 			sprintf(buf, "%s%08d.jpg", param_dump_prefix, numImg);
-			cvSaveImage(buf, testImg );
+      imwrite(buf, testImg);
 		}
 
 		numImg++;
