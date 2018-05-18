@@ -1,3 +1,5 @@
+**NOTE: This project is a very old one that is unlikely to give interesting results for nowadays applications. It uses a now more or less deprecated version of OpenCV so even running it will take some work.**
+
 = Head Counter =
 
 The aim of this software is to be able to count the number of people present in a crowd, especially in protests, and provide an estimate as accurate as possible. This software is currently at a very early stage.
@@ -19,6 +21,4 @@ cvplayer is a simple test utility to check that your opencv configuration manage
 
 headcounter is the main program. headcounter -h gives you instruction on how to use it.
 
-Support
-=======
-You can contact me at quemener dot yves at free dot fr. 
+
